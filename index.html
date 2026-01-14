@@ -63,92 +63,23 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 1.1em;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 40px 0 20px 0;
+            font-size: 1em;
         }
         
-        thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
         
         th {
-            padding: 18px;
-            text-align: left;
+            background-color: #f5f5f5;
             font-weight: 600;
-            font-size: 1.1em;
-            border-bottom: 3px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        th:first-child {
-            border-top-left-radius: 8px;
-        }
-        
-        th:last-child {
-            border-top-right-radius: 8px;
-        }
-        
-        td {
-            padding: 16px 18px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        tbody tr {
-            transition: background-color 0.2s ease;
         }
         
         tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-        
-        tbody tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-        
-        tbody tr:nth-child(even):hover {
-            background-color: #f0f0f0;
-        }
-        
-        .race-name {
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .data-sources {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
-        }
-        
-        .data-sources h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-        
-        .data-sources ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .data-sources li {
-            color: #666;
-            margin: 8px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .data-sources li:before {
-            content: "•";
-            color: #667eea;
-            font-weight: bold;
-            position: absolute;
-            left: 0;
+            background-color: #f9f9f9;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -157,18 +88,6 @@
     <div class="container">
         <h1>Race/Ethnicity Data Table</h1>
         <p class="subtitle">Health and Economic Indicators by Race/Ethnicity</p>
-        
-        <!-- Health Metrics Chart -->
-        <div class="chart-container">
-            <h2 class="chart-title">Health Metrics: Obesity Rate & Physical Inactivity</h2>
-            <canvas id="healthChart"></canvas>
-        </div>
-        
-        <!-- Income Chart -->
-        <div class="chart-container">
-            <h2 class="chart-title">Median Household Income by Race/Ethnicity</h2>
-            <canvas id="incomeChart"></canvas>
-        </div>
         
         <!-- Combined Comparison Chart -->
         <div class="chart-container">
@@ -187,40 +106,31 @@
             </thead>
             <tbody>
                 <tr>
-                    <td class="race-name">Asian</td>
+                    <td>Asian</td>
                     <td>5.0%</td>
                     <td>20.1%</td>
                     <td>$112,800 (2023)</td>
                 </tr>
                 <tr>
-                    <td class="race-name">White (non-Hispanic)</td>
+                    <td>White (non-Hispanic)</td>
                     <td>14.8%</td>
                     <td>23.0%</td>
                     <td>$92,530 (2024)</td>
                 </tr>
                 <tr>
-                    <td class="race-name">Hispanic</td>
+                    <td>Hispanic</td>
                     <td>22.8%</td>
                     <td>32.1%</td>
                     <td>$70,950 (2024)</td>
                 </tr>
                 <tr>
-                    <td class="race-name">Black (non-Hispanic)</td>
+                    <td>Black (non-Hispanic)</td>
                     <td>29.0%</td>
                     <td>30.0%</td>
                     <td>$56,020 (2024)</td>
                 </tr>
             </tbody>
         </table>
-        
-        <div class="data-sources">
-            <h3>Data Sources:</h3>
-            <ul>
-                <li><strong>Obesity Rate:</strong> CDC data for ages 2-19 years (2017-18)</li>
-                <li><strong>Physical Inactivity:</strong> CDC (BRFSS) data for adults 18+ years (2022)</li>
-                <li><strong>Income:</strong> Recent Median Household Income Data (2023-2024)</li>
-            </ul>
-        </div>
     </div>
     
     <script>
@@ -241,105 +151,6 @@
                 income: 'rgba(75, 192, 192, 1)'
             }
         };
-        
-        // Health Metrics Chart (Grouped Bar)
-        const healthCtx = document.getElementById('healthChart').getContext('2d');
-        new Chart(healthCtx, {
-            type: 'bar',
-            data: {
-                labels: races,
-                datasets: [
-                    {
-                        label: 'Obesity Rate (Teens, %)',
-                        data: obesityRates,
-                        backgroundColor: colors.obesity,
-                        borderColor: colors.borders.obesity,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Physical Inactivity (Adults, %)',
-                        data: inactivityRates,
-                        backgroundColor: colors.inactivity,
-                        borderColor: colors.borders.inactivity,
-                        borderWidth: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + '%';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 40,
-                        title: {
-                            display: true,
-                            text: 'Percentage (%)'
-                        }
-                    }
-                }
-            }
-        });
-        
-        // Income Chart (Bar)
-        const incomeCtx = document.getElementById('incomeChart').getContext('2d');
-        new Chart(incomeCtx, {
-            type: 'bar',
-            data: {
-                labels: races,
-                datasets: [{
-                    label: 'Median Household Income ($)',
-                    data: incomes,
-                    backgroundColor: colors.income,
-                    borderColor: colors.borders.income,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return '$' + context.parsed.y.toLocaleString();
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Income ($)'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        });
         
         // Combined Chart (Normalized - showing all metrics on same scale)
         // Normalize income to 0-100 scale for comparison
