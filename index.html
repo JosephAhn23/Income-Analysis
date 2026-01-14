@@ -16,9 +16,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         
         .container {
@@ -26,8 +23,27 @@
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 900px;
+            max-width: 1200px;
             width: 100%;
+            margin: 0 auto;
+        }
+        
+        .chart-container {
+            margin: 40px 0;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        
+        .chart-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        
+        canvas {
+            max-height: 400px;
         }
         
         h1 {
@@ -135,11 +151,30 @@
             left: 0;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Race/Ethnicity Data Table</h1>
         <p class="subtitle">Health and Economic Indicators by Race/Ethnicity</p>
+        
+        <!-- Health Metrics Chart -->
+        <div class="chart-container">
+            <h2 class="chart-title">Health Metrics: Obesity Rate & Physical Inactivity</h2>
+            <canvas id="healthChart"></canvas>
+        </div>
+        
+        <!-- Income Chart -->
+        <div class="chart-container">
+            <h2 class="chart-title">Median Household Income by Race/Ethnicity</h2>
+            <canvas id="incomeChart"></canvas>
+        </div>
+        
+        <!-- Combined Comparison Chart -->
+        <div class="chart-container">
+            <h2 class="chart-title">All Metrics Comparison (Normalized)</h2>
+            <canvas id="combinedChart"></canvas>
+        </div>
         
         <table>
             <thead>
@@ -187,6 +222,195 @@
             </ul>
         </div>
     </div>
+    
+    <script>
+        // Data
+        const races = ['Asian', 'White (non-Hispanic)', 'Hispanic', 'Black (non-Hispanic)'];
+        const obesityRates = [5.0, 14.8, 22.8, 29.0];
+        const inactivityRates = [20.1, 23.0, 32.1, 30.0];
+        const incomes = [112800, 92530, 70950, 56020];
+        
+        // Colors
+        const colors = {
+            obesity: 'rgba(255, 99, 132, 0.8)',
+            inactivity: 'rgba(54, 162, 235, 0.8)',
+            income: 'rgba(75, 192, 192, 0.8)',
+            borders: {
+                obesity: 'rgba(255, 99, 132, 1)',
+                inactivity: 'rgba(54, 162, 235, 1)',
+                income: 'rgba(75, 192, 192, 1)'
+            }
+        };
+        
+        // Health Metrics Chart (Grouped Bar)
+        const healthCtx = document.getElementById('healthChart').getContext('2d');
+        new Chart(healthCtx, {
+            type: 'bar',
+            data: {
+                labels: races,
+                datasets: [
+                    {
+                        label: 'Obesity Rate (Teens, %)',
+                        data: obesityRates,
+                        backgroundColor: colors.obesity,
+                        borderColor: colors.borders.obesity,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Physical Inactivity (Adults, %)',
+                        data: inactivityRates,
+                        backgroundColor: colors.inactivity,
+                        borderColor: colors.borders.inactivity,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 40,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Income Chart (Bar)
+        const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+        new Chart(incomeCtx, {
+            type: 'bar',
+            data: {
+                labels: races,
+                datasets: [{
+                    label: 'Median Household Income ($)',
+                    data: incomes,
+                    backgroundColor: colors.income,
+                    borderColor: colors.borders.income,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Income ($)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Combined Chart (Normalized - showing all metrics on same scale)
+        // Normalize income to 0-100 scale for comparison
+        const maxIncome = Math.max(...incomes);
+        const normalizedIncomes = incomes.map(inc => (inc / maxIncome) * 100);
+        
+        const combinedCtx = document.getElementById('combinedChart').getContext('2d');
+        new Chart(combinedCtx, {
+            type: 'bar',
+            data: {
+                labels: races,
+                datasets: [
+                    {
+                        label: 'Obesity Rate (%)',
+                        data: obesityRates,
+                        backgroundColor: colors.obesity,
+                        borderColor: colors.borders.obesity,
+                        borderWidth: 2,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Physical Inactivity (%)',
+                        data: inactivityRates,
+                        backgroundColor: colors.inactivity,
+                        borderColor: colors.borders.inactivity,
+                        borderWidth: 2,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Income (Normalized to %)',
+                        data: normalizedIncomes,
+                        backgroundColor: colors.income,
+                        borderColor: colors.borders.income,
+                        borderWidth: 2,
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.label.includes('Income')) {
+                                    const originalValue = incomes[context.dataIndex];
+                                    return 'Income: $' + originalValue.toLocaleString() + ' (normalized: ' + context.parsed.y.toFixed(1) + '%)';
+                                }
+                                return context.dataset.label + ': ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Percentage / Normalized Value (%)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 
